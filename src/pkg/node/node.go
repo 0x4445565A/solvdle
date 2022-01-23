@@ -1,10 +1,4 @@
-package main
-
-import (
-	"bufio"
-	"log"
-	"os"
-)
+package node
 
 const MAX_LEVEL = 5
 const WILDCARD = '_'
@@ -43,6 +37,20 @@ type Node struct {
 	Level int
 	// We store a-z nodes
 	Children [26]*Node
+}
+
+func (n *Node) Insert(s string) {
+	position := n
+	for i, c := range s {
+		if position.Children[RuneToIndex[c]] == nil {
+			position.Children[RuneToIndex[c]] = &Node{
+				Value: c,
+				Level: i + 1,
+			}
+		}
+
+		position = position.Children[RuneToIndex[c]]
+	}
 }
 
 func (n *Node) FindWord(s string) bool {
@@ -137,51 +145,4 @@ func removeFirstChar(s string) (rune, string) {
 	}
 
 	return c, s[1:]
-}
-
-func main() {
-	root := &Node{}
-
-	file, err := os.Open("words_len5.txt")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		position := root
-		for i, c := range scanner.Text() {
-			if position.Children[RuneToIndex[c]] == nil {
-
-				position.Children[RuneToIndex[c]] = &Node{
-					Value: c,
-					Level: i + 1,
-				}
-			}
-
-			position = position.Children[RuneToIndex[c]]
-		}
-	}
-
-	log.Println(root.MatchPattern("_i_c_", map[rune]bool{
-		'm': true,
-		'c': true,
-		'p': true,
-		'y': true,
-		's': true,
-		'o': true,
-		'a': true,
-		'b': true,
-		't': true,
-		'h': true,
-		'g': true,
-	}, map[rune]int{
-		'i': 4,
-		'c': 5,
-	}))
-
-	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
-	}
 }
