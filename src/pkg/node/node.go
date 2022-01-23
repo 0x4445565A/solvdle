@@ -129,7 +129,7 @@ func (n *Node) MatchPattern(pattern string, banned map[rune]bool, levelBanned ma
 
 func removeFirstChar(s string) (rune, string) {
 	if s == "" {
-		return 0, ""
+		return rune(0), ""
 	}
 
 	c := rune(s[0])
