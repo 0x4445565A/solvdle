@@ -28,7 +28,11 @@ func main() {
 		'e': true,
 		'u': true,
 		'h': true,
-	}, map[rune]int{}))
+	}, map[rune]int{
+		'o': 2,
+	}, map[rune]bool{
+		'o': true,
+	}))
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)

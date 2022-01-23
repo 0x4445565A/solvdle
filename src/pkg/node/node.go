@@ -65,22 +65,20 @@ func (n *Node) FindWord(s string) bool {
 	return true
 }
 
-func (n *Node) MatchPattern(pattern string, banned map[rune]bool, needed map[rune]int) []string {
+func (n *Node) MatchPattern(pattern string, banned map[rune]bool, levelBanned map[rune]int, needed map[rune]bool) []string {
 	var ret []string
+	var validChildren []*Node
 
 	if pattern == "" {
-
 		// Since we have letters that we need still but are at the ened of the road, skip em
 		if len(needed) > 0 {
-			return []string{}
+			return ret
 		}
 
 		return []string{string(n.Value)}
 	}
 
 	c, s := removeFirstChar(pattern)
-
-	var validChildren []*Node
 
 	if c == WILDCARD {
 		validChildren = n.Children[:]
@@ -90,11 +88,6 @@ func (n *Node) MatchPattern(pattern string, banned map[rune]bool, needed map[run
 		}
 	}
 
-	force := false
-	if MAX_LEVEL-n.Level <= len(needed) {
-		force = true
-	}
-
 	for _, nn := range validChildren {
 		if nn != nil {
 			// in our banned list meaning we should not search
@@ -102,33 +95,34 @@ func (n *Node) MatchPattern(pattern string, banned map[rune]bool, needed map[run
 				continue
 			}
 
-			if lvl, ok := needed[nn.Value]; ok || !force {
-				// We need this character but not on this level
-				if lvl == nn.Level {
-					continue
-				}
-
-				// Maps pass by reference so we need to remake it.  Small enough to be fine.
-				needed_copy := needed
-				if ok {
-					needed_copy = map[rune]int{}
-					for k, level := range needed {
-						if k == nn.Value {
-							continue
-						}
-						needed_copy[k] = level
-					}
-				}
-
-				// We're going down down in an earlier round, and sugar we're going down swinging
-				//                                                             --  Aristotle
-				ret = append(ret, nn.MatchPattern(s, banned, needed_copy)...)
+			lvl, ok := levelBanned[nn.Value]
+			// We need this character but not on this level
+			if ok && lvl == nn.Level {
+				continue
 			}
+
+			// Maps pass by reference so we need to remake it.  Small enough to be fine.
+			neededCopy := needed
+			if ok && c == WILDCARD {
+				neededCopy = map[rune]bool{}
+				for k, level := range needed {
+					if k == nn.Value {
+						continue
+					}
+					neededCopy[k] = level
+				}
+			}
+
+			// We're going down down in an earlier round, and sugar we're going down swinging
+			//                                                             --  Aristotle
+			ret = append(ret, nn.MatchPattern(s, banned, levelBanned, neededCopy)...)
 		}
 	}
 
-	for i, s := range ret {
-		ret[i] = string(n.Value) + s
+	if n.Level > 0 {
+		for i, s := range ret {
+			ret[i] = string(n.Value) + s
+		}
 	}
 	return ret
 }
