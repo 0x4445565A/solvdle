@@ -22,7 +22,7 @@ func main() {
 		root.Insert(scanner.Text())
 	}
 
-	log.Println(root.MatchPattern("c_imp", map[rune]bool{
+	log.Println(root.MatchPattern("c__mp", map[rune]bool{
 		'a': true,
 		'd': true,
 		'e': true,
